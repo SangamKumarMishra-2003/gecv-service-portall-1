@@ -1,0 +1,88 @@
+.hostelInchargeDashboard {
+  max-width: 1100px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+
+  h2 {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    color: #2a3a4b;
+    font-weight: 700;
+  }
+
+  section {
+    margin-bottom: 2.5rem;
+    h3 {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      color: #2563eb;
+      font-weight: 600;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #f9fafb;
+      th, td {
+        padding: 0.7rem 0.5rem;
+        border: 1px solid #e5e7eb;
+        text-align: left;
+        font-size: 1rem;
+      }
+      th {
+        background: #f1f5f9;
+        color: #374151;
+        font-weight: 700;
+      }
+      tr:nth-child(even) {
+        background: #f3f4f6;
+      }
+      a {
+        color: #2563eb;
+        text-decoration: underline;
+        &:hover {
+          color: #1d4ed8;
+        }
+      }
+      button {
+        background: #059669;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        padding: 0.4rem 1rem;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        margin-right: 0.5rem;
+        transition: background 0.2s;
+        &:hover {
+          background: #047857;
+        }
+        &:disabled {
+          background: #a7f3d0;
+          cursor: not-allowed;
+        }
+      }
+      button:last-child {
+        background: #ef4444;
+        &:hover {
+          background: #b91c1c;
+        }
+      }
+    }
+  }
+
+  .hostelersSection {
+    h3 {
+      color: #2a3a4b;
+    }
+    button {
+      background: #ef4444;
+      &:hover {
+        background: #b91c1c;
+      }
+    }
+  }
+}

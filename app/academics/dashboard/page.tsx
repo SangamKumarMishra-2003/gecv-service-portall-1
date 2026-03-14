@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { generateBonafidePDF } from "../../utils/generateBonafidePDF";
+import { generateFeeStructurePDFDashboard } from "../../utils/generateFeeStructurePDFDashboard";
 
 interface UserInfo {
   name: string;
@@ -46,6 +47,7 @@ interface ManagedUser {
   dob?: string;
   admissionDate?: string;
   expectedCompletionYear?: string;
+  category?: string;
 }
 
 interface Student {
@@ -140,6 +142,17 @@ export default function AcademicsDashboard() {
   const [newUserRole, setNewUserRole] = useState<"student" | "faculty">("student");
   const [newUserRegNo, setNewUserRegNo] = useState("");
   const [newUserMobile, setNewUserMobile] = useState("");
+  const [newUserCourse, setNewUserCourse] = useState("");
+  const [newUserBranch, setNewUserBranch] = useState("");
+  const [newUserSemester, setNewUserSemester] = useState<number | "">("");
+  const [newUserYear, setNewUserYear] = useState<number | "">("");
+  const [newUserSession, setNewUserSession] = useState("");
+  const [newUserFatherName, setNewUserFatherName] = useState("");
+  const [newUserMotherName, setNewUserMotherName] = useState("");
+  const [newUserDob, setNewUserDob] = useState("");
+  const [newUserAdmissionDate, setNewUserAdmissionDate] = useState("");
+  const [newUserExpectedCompletion, setNewUserExpectedCompletion] = useState("");
+  const [newUserCategory, setNewUserCategory] = useState("");
   const [createError, setCreateError] = useState("");
   const [createSuccess, setCreateSuccess] = useState("");
   const [createLoading, setCreateLoading] = useState(false);
@@ -318,6 +331,29 @@ export default function AcademicsDashboard() {
           admissionDate: student.admissionDate ? new Date(student.admissionDate).toLocaleDateString() : "",
           expectedCompletionYear: student.expectedCompletionYear || "",
         });
+      } else if (selectedRequest.serviceType === "FeeStructure") {
+        generateFeeStructurePDFDashboard({
+          name: student.name,
+          regNo: student.regNo,
+          course: student.course || "B.Tech",
+          branch: student.branch || "",
+          semester: String(student.semester || ""),
+          year: String(student.year || ""),
+          session: student.session || "",
+          dob: student.dob ? new Date(student.dob).toLocaleDateString() : "",
+          fatherName: student.fatherName || "",
+          motherName: student.motherName || "",
+          admissionDate: student.admissionDate ? new Date(student.admissionDate).toLocaleDateString() : "",
+          expectedCompletionYear: student.expectedCompletionYear || "",
+          paymentDate: selectedRequest.paymentDate || "",
+          transactionId: selectedRequest.transactionId || "",
+          admissionFee: Number(selectedRequest.admissionFee) || 0,
+          tuitionFee: Number(selectedRequest.tuitionFee) || 0,
+          registrationFee: Number(selectedRequest.registrationFee) || 0,
+          examFee: Number(selectedRequest.examFee) || 0,
+          developmentFee: Number(selectedRequest.developmentFee) || 0,
+          otherCharges: Number(selectedRequest.otherCharges) || 0,
+        });
       }
 
       // Close modal and refresh
@@ -351,6 +387,29 @@ export default function AcademicsDashboard() {
         motherName: student.motherName || "",
         admissionDate: student.admissionDate ? new Date(student.admissionDate).toLocaleDateString() : "",
         expectedCompletionYear: student.expectedCompletionYear || "",
+      });
+    } else if (request.serviceType === "FeeStructure") {
+      generateFeeStructurePDFDashboard({
+        name: student.name,
+        regNo: student.regNo,
+        course: student.course || "B.Tech",
+        branch: student.branch || "",
+        semester: String(student.semester || ""),
+        year: String(student.year || ""),
+        session: student.session || "",
+        dob: student.dob ? new Date(student.dob).toLocaleDateString() : "",
+        fatherName: student.fatherName || "",
+        motherName: student.motherName || "",
+        admissionDate: student.admissionDate ? new Date(student.admissionDate).toLocaleDateString() : "",
+        expectedCompletionYear: student.expectedCompletionYear || "",
+        paymentDate: request.paymentDate || "",
+        transactionId: request.transactionId || "",
+        admissionFee: Number(request.admissionFee) || 0,
+        tuitionFee: Number(request.tuitionFee) || 0,
+        registrationFee: Number(request.registrationFee) || 0,
+        examFee: Number(request.examFee) || 0,
+        developmentFee: Number(request.developmentFee) || 0,
+        otherCharges: Number(request.otherCharges) || 0,
       });
     }
     // Add other document types as needed
@@ -400,13 +459,128 @@ export default function AcademicsDashboard() {
     setCreateError("");
     setCreateSuccess("");
 
+    // Basic validation
     if (!newUserName || !newUserEmail || !newUserPassword) {
       setCreateError("Name, email, and password are required");
       return;
     }
 
-    if (newUserRole === "student" && !newUserRegNo) {
-      setCreateError("Registration number is required for students");
+    // Name validation
+    if (!/^[a-zA-Z\s\.]+$/.test(newUserName) || newUserName.length < 2 || newUserName.length > 50) {
+      setCreateError("Name must be 2-50 characters and contain only letters, spaces, and periods");
+      return;
+    }
+
+    // Email validation
+    if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(newUserEmail)) {
+      setCreateError("Please enter a valid email address");
+      return;
+    }
+
+    // Password strength validation
+    if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(newUserPassword)) {
+      setCreateError("Password must be at least 8 characters with uppercase, lowercase, number, and special character");
+      return;
+    }
+
+    if (newUserRole === "student") {
+      if (!newUserRegNo) {
+        setCreateError("Registration number is required for students");
+        return;
+      }
+
+      // Registration number validation
+      if (!/^\d{11}$/.test(newUserRegNo)) {
+        setCreateError("Registration number must be exactly 11 digits");
+        return;
+      }
+
+      // Mobile validation (if provided)
+      if (newUserMobile && !/^[6-9]\d{9}$/.test(newUserMobile)) {
+        setCreateError("Mobile number must start with 6-9 and be 10 digits");
+        return;
+      }
+
+      // Academic details validation
+      if (!newUserCourse || !newUserBranch || !newUserSemester || !newUserYear || !newUserSession) {
+        setCreateError("Course, branch, semester, year, and session are required for students");
+        return;
+      }
+
+      // Session format validation
+      if (!/^\d{4}-\d{4}$/.test(newUserSession)) {
+        setCreateError("Session must be in YYYY-YYYY format");
+        return;
+      }
+
+      const sessionStart = parseInt(newUserSession.split('-')[0]);
+      const sessionEnd = parseInt(newUserSession.split('-')[1]);
+      if (sessionEnd <= sessionStart) {
+        setCreateError("Session end year must be greater than start year");
+        return;
+      }
+
+      // Expected completion validation
+      if (!newUserExpectedCompletion || !/^\d{4}$/.test(newUserExpectedCompletion)) {
+        setCreateError("Expected completion year must be in YYYY format");
+        return;
+      }
+
+      const expectedYear = parseInt(newUserExpectedCompletion);
+      if (expectedYear < sessionStart || expectedYear > sessionEnd + 2) {
+        setCreateError("Expected completion year should be within session range");
+        return;
+      }
+
+      // Semester and year validation
+      if (newUserSemester < 1 || newUserSemester > 8) {
+        setCreateError("Semester must be between 1 and 8");
+        return;
+      }
+      if (newUserYear < 1 || newUserYear > 4) {
+        setCreateError("Year must be between 1 and 4");
+        return;
+      }
+
+      // Personal details validation
+      if (!newUserFatherName || !newUserMotherName || !newUserDob || !newUserAdmissionDate || !newUserCategory) {
+        setCreateError("Father's name, mother's name, date of birth, admission date, and category are required for students");
+        return;
+      }
+
+      // Parent names validation
+      if (!/^[a-zA-Z\s\.]+$/.test(newUserFatherName) || newUserFatherName.length < 2 || newUserFatherName.length > 50) {
+        setCreateError("Father's name must be 2-50 characters and contain only letters, spaces, and periods");
+        return;
+      }
+      if (!/^[a-zA-Z\s\.]+$/.test(newUserMotherName) || newUserMotherName.length < 2 || newUserMotherName.length > 50) {
+        setCreateError("Mother's name must be 2-50 characters and contain only letters, spaces, and periods");
+        return;
+      }
+
+      // Date validations
+      const today = new Date().toISOString().split('T')[0];
+      if (newUserDob > today) {
+        setCreateError("Date of birth cannot be in the future");
+        return;
+      }
+      if (newUserAdmissionDate > today) {
+        setCreateError("Date of admission cannot be in the future");
+        return;
+      }
+
+      const dob = new Date(newUserDob);
+      const admissionDate = new Date(newUserAdmissionDate);
+      const ageAtAdmission = admissionDate.getFullYear() - dob.getFullYear();
+      if (ageAtAdmission < 15 || ageAtAdmission > 30) {
+        setCreateError("Student age at admission should be between 15-30 years");
+        return;
+      }
+    }
+
+    // Faculty mobile validation (if provided)
+    if (newUserRole === "faculty" && newUserMobile && !/^[6-9]\d{9}$/.test(newUserMobile)) {
+      setCreateError("Mobile number must start with 6-9 and be 10 digits");
       return;
     }
 
@@ -426,6 +600,17 @@ export default function AcademicsDashboard() {
           role: newUserRole,
           regNo: newUserRegNo,
           mobile: newUserMobile,
+          course: newUserCourse,
+          branch: newUserBranch,
+          semester: newUserSemester,
+          year: newUserYear,
+          session: newUserSession,
+          fatherName: newUserFatherName,
+          motherName: newUserMotherName,
+          dob: newUserDob,
+          admissionDate: newUserAdmissionDate,
+          expectedCompletionYear: newUserExpectedCompletion,
+          category: newUserCategory,
         }),
       });
 
@@ -441,6 +626,17 @@ export default function AcademicsDashboard() {
       setNewUserPassword("");
       setNewUserRegNo("");
       setNewUserMobile("");
+      setNewUserCourse("");
+      setNewUserBranch("");
+      setNewUserSemester("");
+      setNewUserYear("");
+      setNewUserSession("");
+      setNewUserFatherName("");
+      setNewUserMotherName("");
+      setNewUserDob("");
+      setNewUserAdmissionDate("");
+      setNewUserExpectedCompletion("");
+      setNewUserCategory("");
       fetchUsers();
       setTimeout(() => setShowCreateModal(false), 1200);
     } catch (err: unknown) {
@@ -502,6 +698,12 @@ export default function AcademicsDashboard() {
       semester: u.semester,
       session: u.session,
       year: u.year,
+      fatherName: u.fatherName,
+      motherName: u.motherName,
+      dob: u.dob,
+      admissionDate: u.admissionDate,
+      expectedCompletionYear: u.expectedCompletionYear,
+      category: u.category,
     });
     setShowEditModal(true);
   };
@@ -647,6 +849,7 @@ export default function AcademicsDashboard() {
     if (/(dob|dateofbirth)/.test(key)) return "dob";
     if (/(admissiondate|admission)/.test(key)) return "admissionDate";
     if (/(expectedcompletion|expectedcompletionyear|completion)/.test(key)) return "expectedCompletionYear";
+    if (/(category|cat)/.test(key)) return "category";
     return ""; // unknown
   };
 
@@ -767,6 +970,7 @@ const handleImportCSV = async (rawText?: string) => {
             dob: u.dob,
             admissionDate: u.admissionDate,
             expectedCompletionYear: u.expectedCompletionYear,
+            category: u.category,
           }),
         });
 
@@ -963,7 +1167,7 @@ const handleImportCSV = async (rawText?: string) => {
                     <td>{req.studentId?.name || "N/A"}</td>
                     <td>{req.studentId?.regNo || "N/A"}</td>
                     <td>{serviceLabels[req.serviceType] || req.serviceType}</td>
-                    <td className={styles.purposeCell}>{req.purpose}</td>
+                    <td className={styles.purposeCell}>{req.purpose || req.purposeType}</td>
                     <td>{formatDate(req.createdAt)}</td>
                     {requestsFilter === "Rejected" && (
                       <td className={styles.rejectionCell}>{req.rejectionReason}</td>
@@ -1231,7 +1435,7 @@ const handleImportCSV = async (rawText?: string) => {
       {/* Create User Modal */}
       {showCreateModal && (
         <div className={styles.modalOverlay}>
-          <div className={styles.modal}>
+          <div className={styles.modal} style={{ width: "600px", maxHeight: "90vh", overflowY: "auto" }}>
             <div className={styles.modalHeader}>
               <h3>Create New User</h3>
               <button onClick={() => setShowCreateModal(false)}>
@@ -1239,40 +1443,274 @@ const handleImportCSV = async (rawText?: string) => {
               </button>
             </div>
 
-            <label>Role *</label>
-            <select value={newUserRole} onChange={(e) => setNewUserRole(e.target.value as "student" | "faculty")}>
-              <option value="student">Student</option>
-              <option value="faculty">Faculty</option>
-            </select>
+            <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+              <div>
+                <label>Role *</label>
+                <select value={newUserRole} onChange={(e) => setNewUserRole(e.target.value as "student" | "faculty")}>
+                  <option value="student">Student</option>
+                  <option value="faculty">Faculty</option>
+                </select>
+              </div>
 
-            <label>Name *</label>
-            <input type="text" placeholder="Full name" value={newUserName} onChange={(e) => setNewUserName(e.target.value)} />
+              <div>
+                <label>Student Name *</label>
+                <input
+                  type="text"
+                  placeholder="Full name (e.g., John Doe)"
+                  value={newUserName}
+                  onChange={(e) => setNewUserName(e.target.value)}
+                  required
+                  minLength={2}
+                  maxLength={50}
+                  pattern="^[a-zA-Z\s\.]+$"
+                  title="Name can only contain letters, spaces, and periods"
+                />
+              </div>
 
-            <label>Email *</label>
-            <input type="email" placeholder="Email address" value={newUserEmail} onChange={(e) => setNewUserEmail(e.target.value)} />
+              <div>
+                <label>Email *</label>
+                <input
+                  type="email"
+                  placeholder="Email address (e.g., student@college.edu)"
+                  value={newUserEmail}
+                  onChange={(e) => setNewUserEmail(e.target.value)}
+                  required
+                  pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+                  title="Please enter a valid email address"
+                />
+              </div>
 
-            <label>Password *</label>
-            <div className={styles.passwordInput}>
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                value={newUserPassword}
-                onChange={(e) => setNewUserPassword(e.target.value)}
-              />
-              <button type="button" onClick={() => setShowPassword(!showPassword)}>
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
+              <div>
+                <label>Password *</label>
+                <div className={styles.passwordInput}>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Password (min 8 chars, include uppercase, lowercase, number, special char)"
+                    value={newUserPassword}
+                    onChange={(e) => setNewUserPassword(e.target.value)}
+                    required
+                    minLength={8}
+                    pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
+                    title="Password must be at least 8 characters with uppercase, lowercase, number, and special character"
+                  />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)}>
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
+
+              {newUserRole === "student" && (
+                <>
+                  <div>
+                    <label>Registration No *</label>
+                    <input
+                      type="text"
+                      placeholder="e.g., 21105152003 (11 digits)"
+                      value={newUserRegNo}
+                      onChange={(e) => setNewUserRegNo(e.target.value)}
+                      required
+                      pattern="^\d{11}$"
+                      title="Registration number must be exactly 11 digits"
+                      maxLength={11}
+                    />
+                  </div>
+
+                  <div>
+                    <label>Mobile</label>
+                    <input
+                      type="tel"
+                      placeholder="Mobile number (10 digits)"
+                      value={newUserMobile}
+                      onChange={(e) => setNewUserMobile(e.target.value)}
+                      pattern="^[6-9]\d{9}$"
+                      title="Mobile number must start with 6-9 and be 10 digits"
+                      maxLength={10}
+                    />
+                  </div>
+
+                  <hr style={{ margin: "10px 0", border: "0", borderTop: "1px solid #eee" }} />
+                  <strong style={{ fontSize: "14px", color: "#555" }}>Academic Details</strong>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px" }}>
+                    <div>
+                      <label>Course *</label>
+                      <select
+                        value={newUserCourse}
+                        onChange={(e) => setNewUserCourse(e.target.value)}
+                        required
+                      >
+                        <option value="">Select Course</option>
+                        <option value="B.Tech">B.Tech</option>
+                        <option value="M.Tech">M.Tech</option>
+                        <option value="BCA">BCA</option>
+                        <option value="MCA">MCA</option>
+                        <option value="B.Sc">B.Sc</option>
+                        <option value="M.Sc">M.Sc</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label>Branch *</label>
+                      <select
+                        value={newUserBranch}
+                        onChange={(e) => setNewUserBranch(e.target.value)}
+                        required
+                      >
+                        <option value="">Select Branch</option>
+                        <option value="Computer Science">Computer Science</option>
+                        <option value="Information Technology">Information Technology</option>
+                        <option value="Mechanical">Mechanical</option>
+                        <option value="Civil">Civil</option>
+                        <option value="Electrical">Electrical</option>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Mathematics">Mathematics</option>
+                        <option value="Physics">Physics</option>
+                        <option value="Chemistry">Chemistry</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label>Semester *</label>
+                      <input
+                        type="number"
+                        placeholder="1-8"
+                        value={newUserSemester}
+                        onChange={(e) => setNewUserSemester(e.target.value ? Number(e.target.value) : "")}
+                        required
+                        min="1"
+                        max="8"
+                      />
+                    </div>
+                    <div>
+                      <label>Year *</label>
+                      <input
+                        type="number"
+                        placeholder="1-4"
+                        value={newUserYear}
+                        onChange={(e) => setNewUserYear(e.target.value ? Number(e.target.value) : "")}
+                        required
+                        min="1"
+                        max="4"
+                      />
+                    </div>
+                    <div>
+                      <label>Academic Session *</label>
+                      <input
+                        type="text"
+                        placeholder="YYYY-YYYY (e.g., 2024-2028)"
+                        value={newUserSession}
+                        onChange={(e) => setNewUserSession(e.target.value)}
+                        required
+                        pattern="^\d{4}-\d{4}$"
+                        title="Session must be in YYYY-YYYY format (e.g., 2024-2028)"
+                        maxLength={9}
+                      />
+                    </div>
+                    <div>
+                      <label>Expected Completion *</label>
+                      <input
+                        type="text"
+                        placeholder="YYYY (e.g., 2028)"
+                        value={newUserExpectedCompletion}
+                        onChange={(e) => setNewUserExpectedCompletion(e.target.value)}
+                        required
+                        pattern="^\d{4}$"
+                        title="Expected completion year must be in YYYY format"
+                        maxLength={4}
+                      />
+                    </div>
+                  </div>
+
+                  <hr style={{ margin: "10px 0", border: "0", borderTop: "1px solid #eee" }} />
+                  <strong style={{ fontSize: "14px", color: "#555" }}>Personal Details</strong>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px" }}>
+                    <div>
+                      <label>Father's Name *</label>
+                      <input
+                        type="text"
+                        placeholder="Father's full name"
+                        value={newUserFatherName}
+                        onChange={(e) => setNewUserFatherName(e.target.value)}
+                        required
+                        minLength={2}
+                        maxLength={50}
+                        pattern="^[a-zA-Z\s\.]+$"
+                        title="Name can only contain letters, spaces, and periods"
+                      />
+                    </div>
+                    <div>
+                      <label>Mother's Name *</label>
+                      <input
+                        type="text"
+                        placeholder="Mother's full name"
+                        value={newUserMotherName}
+                        onChange={(e) => setNewUserMotherName(e.target.value)}
+                        required
+                        minLength={2}
+                        maxLength={50}
+                        pattern="^[a-zA-Z\s\.]+$"
+                        title="Name can only contain letters, spaces, and periods"
+                      />
+                    </div>
+                    <div>
+                      <label>Date of Birth *</label>
+                      <input
+                        type="date"
+                        value={newUserDob}
+                        onChange={(e) => setNewUserDob(e.target.value)}
+                        required
+                        max={new Date().toISOString().split('T')[0]}
+                        min="1990-01-01"
+                        title="Date of birth must be between 1990 and today"
+                      />
+                    </div>
+                    <div>
+                      <label>Date of Admission *</label>
+                      <input
+                        type="date"
+                        value={newUserAdmissionDate}
+                        onChange={(e) => setNewUserAdmissionDate(e.target.value)}
+                        required
+                        max={new Date().toISOString().split('T')[0]}
+                        min="2000-01-01"
+                        title="Date of admission must be between 2000 and today"
+                      />
+                    </div>
+                    <div style={{ gridColumn: "span 2" }}>
+                      <label>Category *</label>
+                      <select
+                        value={newUserCategory}
+                        onChange={(e) => setNewUserCategory(e.target.value)}
+                        required
+                      >
+                        <option value="">Select Category</option>
+                        <option value="General">General</option>
+                        <option value="SC">SC (Scheduled Caste)</option>
+                        <option value="ST">ST (Scheduled Tribe)</option>
+                        <option value="OBC">OBC (Other Backward Class)</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {newUserRole === "faculty" && (
+                <div>
+                  <label>Mobile (Optional)</label>
+                  <input
+                    type="tel"
+                    placeholder="Mobile number (10 digits)"
+                    value={newUserMobile}
+                    onChange={(e) => setNewUserMobile(e.target.value)}
+                    pattern="^[6-9]\d{9}$"
+                    title="Mobile number must start with 6-9 and be 10 digits"
+                    maxLength={10}
+                  />
+                </div>
+              )}
             </div>
-
-            {newUserRole === "student" && (
-              <>
-                <label>Registration Number *</label>
-                <input type="text" placeholder="e.g., 21105152003" value={newUserRegNo} onChange={(e) => setNewUserRegNo(e.target.value)} />
-              </>
-            )}
-
-            <label>Mobile (Optional)</label>
-            <input type="text" placeholder="Mobile number" value={newUserMobile} onChange={(e) => setNewUserMobile(e.target.value)} />
 
             {createError && <p className={styles.errorMsg}>{createError}</p>}
             {createSuccess && <p className={styles.successMsg}>{createSuccess}</p>}
@@ -1343,6 +1781,46 @@ const handleImportCSV = async (rawText?: string) => {
                     <div>
                       <label>Year</label>
                       <input type="number" placeholder="e.g. 1-4" value={editFormData.year || ""} onChange={(e) => setEditFormData({ ...editFormData, year: Number(e.target.value) })} />
+                    </div>
+                    <div>
+                      <label>Expected Completion</label>
+                      <input placeholder="e.g. 2025" value={editFormData.expectedCompletionYear || ""} onChange={(e) => setEditFormData({ ...editFormData, expectedCompletionYear: e.target.value })} />
+                    </div>
+                  </div>
+
+                  <hr style={{ margin: "10px 0", border: "0", borderTop: "1px solid #eee" }} />
+                  <strong style={{ fontSize: "14px", color: "#555" }}>Personal Details</strong>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                    <div>
+                      <label>Father's Name</label>
+                      <input placeholder="Father's full name" value={editFormData.fatherName || ""} onChange={(e) => setEditFormData({ ...editFormData, fatherName: e.target.value })} />
+                    </div>
+                    <div>
+                      <label>Mother's Name</label>
+                      <input placeholder="Mother's full name" value={editFormData.motherName || ""} onChange={(e) => setEditFormData({ ...editFormData, motherName: e.target.value })} />
+                    </div>
+                    <div>
+                      <label>Date of Birth</label>
+                      <input type="date" value={editFormData.dob || ""} onChange={(e) => setEditFormData({ ...editFormData, dob: e.target.value })} />
+                    </div>
+                    <div>
+                      <label>Date of Admission</label>
+                      <input type="date" value={editFormData.admissionDate || ""} onChange={(e) => setEditFormData({ ...editFormData, admissionDate: e.target.value })} />
+                    </div>
+                    <div style={{ gridColumn: "span 2" }}>
+                      <label>Category</label>
+                      <select
+                        value={editFormData.category || ""}
+                        onChange={(e) => setEditFormData({ ...editFormData, category: e.target.value })}
+                      >
+                        <option value="">Select Category</option>
+                        <option value="General">General</option>
+                        <option value="SC">SC</option>
+                        <option value="ST">ST</option>
+                        <option value="OBC">OBC</option>
+                        <option value="Other">Other</option>
+                      </select>
                     </div>
                   </div>
                 </>
