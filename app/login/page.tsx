@@ -11,7 +11,7 @@ import styles from "./Login.module.scss";
 import LoginModal from "../../components/LoginModal";
 export default function LoginPage() {
   const [activeRole, setActiveRole] = useState<
-    "Student" | "Faculty" | "Academics" | null
+    "Student" | "Faculty" | "Academics" | "Hostel Incharge" | null
   >(null);
 
   return (
@@ -88,6 +88,23 @@ export default function LoginPage() {
           >
               <Lottie animationData={animationDataacedemics}/>
             <h3>Academics Login</h3>
+            <span>Click to continue</span>
+          </motion.button>
+          {/* HOSTEL INCHARGE */}
+          <motion.button
+            type="button"
+            className={`${styles.card} ${styles.cardHostelIncharge} ${
+              activeRole === "Hostel Incharge" ? styles.activeCard : ""
+            }`}
+            variants={{
+              hidden: { opacity: 0, y: 30 },
+              visible: { opacity: 1, y: 0 },
+            }}
+            transition={{ duration: 0.5 }}
+            onClick={() => setActiveRole("Hostel Incharge")}
+          >
+            <Lottie animationData={animationDataacedemics}/>
+            <h3>Hostel Incharge Login</h3>
             <span>Click to continue</span>
           </motion.button>
         </motion.div>

@@ -17,7 +17,7 @@ const UserSchema = new Schema(
     },
     role: {
       type: String,
-      enum: ["student", "faculty", "academics"],
+      enum: ["student", "faculty", "academics", "hostel-incharge"],
       required: true,
     },
     // Student specific fields
@@ -62,6 +62,9 @@ const UserSchema = new Schema(
     },
     expectedCompletionYear: {
         type: String
+    },
+    category: {
+        type: String // e.g., "General", "SC", "ST", "OBC"
     }
   },
   { timestamps: true }
