@@ -1,0 +1,22 @@
+.cards {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 20px;
+}
+
+.card {
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+.card h4 {
+  font-size: 14px;
+  color: gray;
+}
+
+.card p {
+  font-size: 24px;
+  font-weight: 600;
+}
