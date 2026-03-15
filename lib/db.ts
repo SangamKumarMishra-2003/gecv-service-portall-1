@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import "@/models/User";
 
 const MONGO_URI = process.env.MONGO_URI as string;
 

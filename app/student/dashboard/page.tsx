@@ -46,14 +46,25 @@ interface Notification {
   relatedRequestId?: { serviceType: string; status: string };
 }
 
+interface HostelApplication {
+  _id: string;
+  hostelType: string;
+  roomPreference: string;
+  status: "Pending" | "Approved" | "Rejected";
+  rejectionReason?: string;
+  createdAt: string;
+}
+
 export default function StudentDashboard() {
   const router = useRouter();
   const [student, setStudent] = useState<Student | null>(null);
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
+  const [hostelApps, setHostelApps] = useState<HostelApplication[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [requestsLoading, setRequestsLoading] = useState(true);
+  const [hostelAppsLoading, setHostelAppsLoading] = useState(true);
 
   // Modal State
   const [selectedService, setSelectedService] = useState<string | null>(null);
@@ -103,6 +114,8 @@ export default function StudentDashboard() {
 
     // Fetch service requests
     fetchRequests();
+    // Fetch hostel applications
+    fetchHostelApps();
     // Fetch notifications
     fetchNotifications();
   }, [router]);
@@ -123,6 +136,23 @@ export default function StudentDashboard() {
       console.error("Failed to fetch requests");
     } finally {
       setRequestsLoading(false);
+    }
+  };
+
+  const fetchHostelApps = async () => {
+    setHostelAppsLoading(true);
+    try {
+      const res = await fetch("/api/hostel-applications", {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setHostelApps(data.applications || []);
+      }
+    } catch (err) {
+      console.error("Failed to fetch hostel applications");
+    } finally {
+      setHostelAppsLoading(false);
     }
   };
 
@@ -638,6 +668,56 @@ export default function StudentDashboard() {
                       >
                         <Download size={16} /> Download
                       </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </section>
+
+      {/* Hostel Applications Status */}
+      <section className={styles.status}>
+        <h2>Hostel Application Status</h2>
+        {hostelAppsLoading ? (
+          <p>Loading hostel applications...</p>
+        ) : hostelApps.length === 0 ? (
+          <div className={styles.noData} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+            <p>No hostel applications submitted.</p>
+            <button 
+              className={styles.sendBtn} 
+              style={{ width: 'auto', padding: '0.5rem 1rem' }}
+              onClick={() => router.push('/hostel-services')}
+            >
+              Apply for Hostel
+            </button>
+          </div>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>Hostel Type</th>
+                <th>Room Preference</th>
+                <th>Applied On</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {hostelApps.map((app) => (
+                <tr key={app._id}>
+                  <td>{app.hostelType}</td>
+                  <td>{app.roomPreference}</td>
+                  <td>{formatDate(app.createdAt)}</td>
+                  <td>
+                    <span className={`${styles.statusBadge} ${styles[app.status.toLowerCase()]}`}>
+                      {app.status === "Pending" && <Clock size={14} />}
+                      {app.status === "Approved" && <CheckCircle size={14} />}
+                      {app.status === "Rejected" && <XCircle size={14} />}
+                      {app.status}
+                    </span>
+                    {app.status === "Rejected" && app.rejectionReason && (
+                      <p className={styles.rejectionReason}>Reason: {app.rejectionReason}</p>
                     )}
                   </td>
                 </tr>
