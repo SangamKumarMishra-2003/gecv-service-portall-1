@@ -90,6 +90,14 @@ interface ServiceRequest {
   createdAt: string;
   approvedAt?: string;
   rejectedAt?: string;
+  paymentDate?: string;
+  transactionId?: string;
+  admissionFee?: number;
+  tuitionFee?: number;
+  registrationFee?: number;
+  examFee?: number;
+  developmentFee?: number;
+  otherCharges?: number;
 }
 
 interface Notification {
@@ -177,7 +185,7 @@ export default function AcademicsDashboard() {
   const [newUserName, setNewUserName] = useState("");
   const [newUserEmail, setNewUserEmail] = useState("");
   const [newUserPassword, setNewUserPassword] = useState("");
-  const [newUserRole, setNewUserRole] = useState<"student" | "faculty">("student");
+  const [newUserRole, setNewUserRole] = useState<"student" | "warden">("student");
   const [newUserRegNo, setNewUserRegNo] = useState("");
   const [newUserMobile, setNewUserMobile] = useState("");
   const [newUserCourse, setNewUserCourse] = useState("");
@@ -203,6 +211,16 @@ export default function AcademicsDashboard() {
   const [editError, setEditError] = useState("");
   const [editSuccess, setEditSuccess] = useState("");
   const [editLoading, setEditLoading] = useState(false);
+
+  // Hostel Applications State
+  const [hostelApps, setHostelApps] = useState<HostelApplication[]>([]);
+  const [loadingHostelApps, setLoadingHostelApps] = useState(false);
+  const [hostelAppsFilter, setHostelAppsFilter] = useState<"Pending" | "Approved" | "Rejected">("Pending");
+  const [selectedHostelApp, setSelectedHostelApp] = useState<HostelApplication | null>(null);
+  const [hostelActionType, setHostelActionType] = useState<"approve" | "reject" | null>(null);
+  const [hostelRejectionReason, setHostelRejectionReason] = useState("");
+  const [hostelActionLoading, setHostelActionLoading] = useState(false);
+  const [hostelActionError, setHostelActionError] = useState("");
 
   // CSV Import State
   const [showCSVModal, setShowCSVModal] = useState(false);
@@ -247,7 +265,7 @@ export default function AcademicsDashboard() {
       fetchHostelApps();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, requestsFilter, filterService]);
+  }, [activeTab, requestsFilter, filterService, hostelAppsFilter]);
 
   // Service type mapping
   const serviceLabels: Record<string, string> = {
@@ -321,6 +339,24 @@ export default function AcademicsDashboard() {
       console.error("Failed to fetch requests");
     } finally {
       setLoadingRequests(false);
+    }
+  };
+
+  // ---------------- Hostel ----------------
+  const fetchHostelApps = async () => {
+    setLoadingHostelApps(true);
+    try {
+      const res = await fetch(`/api/hostel-applications?status=${hostelAppsFilter}`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setHostelApps(data.applications || []);
+      }
+    } catch (err) {
+      console.error("Failed to fetch hostel applications");
+    } finally {
+      setLoadingHostelApps(false);
     }
   };
 
@@ -705,8 +741,8 @@ export default function AcademicsDashboard() {
       }
     }
 
-    // Faculty mobile validation (if provided)
-    if (newUserRole === "faculty" && newUserMobile && !/^[6-9]\d{9}$/.test(newUserMobile)) {
+    // Warden mobile validation (if provided)
+    if (newUserRole === "warden" && newUserMobile && !/^[6-9]\d{9}$/.test(newUserMobile)) {
       setCreateError("Mobile number must start with 6-9 and be 10 digits");
       return;
     }
@@ -1466,7 +1502,7 @@ const handleImportCSV = async (rawText?: string) => {
       {activeTab === "users" && (
         <section className={styles.usersSection}>
           <div className={styles.usersHeader}>
-            <h2>Manage Students & Faculty</h2>
+            <h2>Manage Students & Hostel Management</h2>
             <div style={{ display: "flex", gap: "8px" }}>
               <button className={styles.addBtn} onClick={() => setShowCreateModal(true)}>
                 <UserPlus size={18} /> Add User
@@ -1767,9 +1803,9 @@ const handleImportCSV = async (rawText?: string) => {
             <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
               <div>
                 <label>Role *</label>
-                <select value={newUserRole} onChange={(e) => setNewUserRole(e.target.value as "student" | "faculty")}>
+                <select value={newUserRole} onChange={(e) => setNewUserRole(e.target.value as "student" | "warden")}>
                   <option value="student">Student</option>
-                  <option value="faculty">Faculty</option>
+                  <option value="warden">Hostel Management</option>
                 </select>
               </div>
 
@@ -2017,7 +2053,7 @@ const handleImportCSV = async (rawText?: string) => {
                 </>
               )}
 
-              {newUserRole === "faculty" && (
+              {newUserRole === "warden" && (
                 <div>
                   <label>Mobile (Optional)</label>
                   <input

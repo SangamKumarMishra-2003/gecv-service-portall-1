@@ -72,7 +72,7 @@ export const generateFeeStructurePDFDashboard = async (data: {
   motherName?: string;
   admissionDate?: string;
   expectedCompletionYear?: string;
-  paymentDate: Date;
+  paymentDate: string | Date;
   admissionFee: number;
   tuitionFee: number;
   registrationFee: number;
