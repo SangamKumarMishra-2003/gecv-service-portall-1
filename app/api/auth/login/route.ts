@@ -21,7 +21,10 @@ export async function POST(req: Request) {
 
     // Determine query based on role
     // Student uses regNo, others use email
-    let query: any = { role: role.toLowerCase() };
+    let dbRole = role.toLowerCase();
+    if (role === "Hostel Incharge") dbRole = "hostel-incharge";
+    
+    let query: any = { role: dbRole };
     if (role === "Student") {
         query.regNo = identifier;
     } else {

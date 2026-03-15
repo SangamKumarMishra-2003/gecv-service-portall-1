@@ -1,34 +1,44 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "./StudentTable.module.scss";
 
 interface Student {
+  _id: string;
   name: string;
   regNo: string;
   branch: string;
-  room: string;
-  contact: string;
+  year?: number;
+  mobile: string;
+  room?: string;
 }
 
 export default function StudentTable() {
-
   const [search, setSearch] = useState("");
+  const [students, setStudents] = useState<Student[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const students: Student[] = [
-    { name: "Rahul Kumar", regNo: "REG101", branch: "CSE", room: "A101", contact: "9876543210" },
-    { name: "Anjali Singh", regNo: "REG102", branch: "IT", room: "A102", contact: "9876543211" },
-  ];
+  useEffect(() => {
+    fetch("/api/hostelers")
+      .then((res) => res.json())
+      .then((data) => {
+        setStudents(data.hostelers || []);
+        setLoading(false);
+      })
+      .catch((err) => console.error("Error fetching hostelers:", err));
+  }, []);
 
   const filteredStudents = students.filter(
     (s) =>
       s.name.toLowerCase().includes(search.toLowerCase()) ||
-      s.regNo.toLowerCase().includes(search.toLowerCase())
+      s.regNo.toLowerCase().includes(search.toLowerCase()) ||
+      s.branch?.toLowerCase().includes(search.toLowerCase())
   );
+
+  if (loading) return <div>Loading students...</div>;
 
   return (
     <div className={styles.studentSection}>
-
       <input
         type="text"
         placeholder="Search student..."
@@ -44,25 +54,28 @@ export default function StudentTable() {
               <th>Name</th>
               <th>Reg No</th>
               <th>Branch</th>
-              <th>Room</th>
-              <th>Contact</th>
+              <th>Mobile</th>
+              <th>Status</th>
             </tr>
           </thead>
 
           <tbody>
-            {filteredStudents.map((s, i) => (
-              <tr key={i}>
-                <td>{s.name}</td>
-                <td>{s.regNo}</td>
-                <td>{s.branch}</td>
-                <td>{s.room}</td>
-                <td>{s.contact}</td>
-              </tr>
-            ))}
+            {filteredStudents.length === 0 ? (
+              <tr><td colSpan={5} style={{textAlign: 'center'}}>No students found</td></tr>
+            ) : (
+              filteredStudents.map((s) => (
+                <tr key={s._id}>
+                  <td>{s.name}</td>
+                  <td>{s.regNo}</td>
+                  <td>{s.branch || "N/A"}</td>
+                  <td>{s.mobile || "N/A"}</td>
+                  <td><span className={styles.activeBadge}>Resident</span></td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
-
     </div>
   );
 }

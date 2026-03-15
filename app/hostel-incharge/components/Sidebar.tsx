@@ -18,31 +18,38 @@ export default function Sidebar() {
       <ul className={styles.navList}>
 
         <li className={pathname === "/hostel-incharge" ? styles.active : ""}>
-          <Link href="/hostel-incharge">
+          <a href="#summary">
             <Home size={18} />
             Dashboard
-          </Link>
+          </a>
         </li>
 
-        <li className={pathname === "/student" ? styles.active : ""}>
-          <Link href="/student">
+        <li>
+          <a href="#requests">
             <Users size={18} />
-            Students
-          </Link>
+            Requests
+          </a>
         </li>
 
-        <li className={pathname === "/rooms" ? styles.active : ""}>
-          <Link href="/rooms">
+        <li>
+          <a href="#students">
+            <Users size={18} />
+            Residents
+          </a>
+        </li>
+
+        <li>
+          <a href="#rooms">
             <Bed size={18} />
             Rooms
-          </Link>
+          </a>
         </li>
 
-        <li className={pathname === "/components/fees" ? styles.active : ""}>
-          <Link href="/components/fees">
+        <li>
+          <a href="#fees">
             <CreditCard size={18} />
             Fees
-          </Link>
+          </a>
         </li>
 
       </ul>
