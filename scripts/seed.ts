@@ -46,6 +46,13 @@ async function seed() {
         password: hashedPassword,
         mobile: "9876543212"
       },
+      {
+        name: "Hostel Incharge",
+        email: "hostel@gecv.ac.in",
+        role: "hostel-incharge",
+        password: hashedPassword,
+        mobile: "9876543213"
+      },
     ];
 
     for (const user of users) {

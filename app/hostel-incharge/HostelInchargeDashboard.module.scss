@@ -1,0 +1,42 @@
+.dashboardContainer {
+  display: flex;
+  min-height: 100vh;
+  background: #f4f6f9;
+}
+
+.mainContent {
+  flex: 1;
+  padding: 30px;
+}
+
+.title {
+  font-size: 26px;
+  font-weight: 600;
+  margin-bottom: 25px;
+}
+
+.section {
+  margin-top: 40px;
+}
+
+/* FIXED TABLE STYLING */
+.tableWrapper {
+  margin-top: 15px;
+}
+
+.tableWrapper table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tableWrapper th {
+  background: #1e293b;
+  color: white;
+  padding: 12px;
+  text-align: left;
+}
+
+.tableWrapper td {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}

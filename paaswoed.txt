@@ -9,3 +9,8 @@ Password: password123
 Academics Login:
 Email: academics@gec.ac.in
 Password: password123
+
+
+hostel login:
+Email id: hostel@gecv.ac.in
+Password: password123

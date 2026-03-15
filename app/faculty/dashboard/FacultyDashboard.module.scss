@@ -1,0 +1,114 @@
+.dashboard {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 30px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+  font-family: "Segoe UI", sans-serif;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.profileBox {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #4f46e5;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.info span {
+  display: block;
+  font-size: 12px;
+  color: #777;
+}
+
+.logoutBtn {
+  background: #ef4444;
+  border: none;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.form {
+  display: grid;
+  gap: 16px;
+}
+
+.form input,
+.form textarea,
+.form select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+
+.buttonRow {
+  display: flex;
+  gap: 10px;
+}
+
+.primaryBtn {
+  background: #4f46e5;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.secondaryBtn {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 9px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.questionBox {
+  margin-top: 25px;
+}
+
+.questionBox li {
+  background: #f9fafb;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+}
+
+.successMsg {
+  margin-top: 16px;
+  color: green;
+}
+
+.testList {
+  margin-top: 40px;
+}
+
+.testCard {
+  padding: 14px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  background: #fafafa;
+}

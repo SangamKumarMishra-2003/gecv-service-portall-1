@@ -1,9 +1,17 @@
 "use client";
 
 import "./globals.css";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
+import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
+
+// Dynamically import components for better performance
+const Header = dynamic(() => import("../components/Header"), {
+  loading: () => <div className="h-16 bg-white shadow-sm"></div>
+});
+
+const Footer = dynamic(() => import("../components/Footer"), {
+  loading: () => <div className="h-16 bg-gray-800"></div>
+});
 
 export default function RootLayout({
   children,
@@ -17,7 +25,7 @@ export default function RootLayout({
     pathname.startsWith("/student/dashboard");
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className="bg-gray-50 text-gray-800" suppressHydrationWarning={true}>
         {!hideLayout && <Header />}
 

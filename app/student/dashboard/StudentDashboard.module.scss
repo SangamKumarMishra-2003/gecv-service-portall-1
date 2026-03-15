@@ -133,6 +133,8 @@
   flex-direction: column;
   gap: 14px;
   animation: scaleIn 0.25s ease-out;
+  max-height: 80vh;
+  overflow-y: auto;
 }
 .modalHeader {
   display: flex;

@@ -1,3 +1,33 @@
+// POST - Send notification to all students
+import User from "@/models/User";
+
+export async function POST(req: Request) {
+  try {
+    const auth = await verifyAuth(req);
+    if (!auth || auth.role !== "faculty") {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+    await connectToDatabase();
+    const { title, message, type } = await req.json();
+    // Find all students
+    const students = await User.find({ role: "student" });
+    const notifications = await Notification.insertMany(
+      students.map((student: any) => ({
+        userId: student._id,
+        title,
+        message,
+        type: type || "info",
+      }))
+    );
+    return NextResponse.json({ success: true, count: notifications.length });
+  } catch (error: any) {
+    console.error("Send Notification Error:", error);
+    return NextResponse.json(
+      { message: "Internal Server Error", error: error.message },
+      { status: 500 }
+    );
+  }
+}
 import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/db";
 import Notification from "@/models/Notification";

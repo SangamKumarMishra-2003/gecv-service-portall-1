@@ -1,0 +1,31 @@
+.studentSection {
+  margin-top: 20px;
+}
+
+.search {
+  padding: 10px;
+  width: 260px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-bottom: 15px;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  background: #1e293b;
+  color: white;
+  padding: 12px;
+}
+
+.table td {
+  padding: 10px;
+  border-bottom: 1px solid #e5e7eb;
+}
