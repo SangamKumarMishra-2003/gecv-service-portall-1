@@ -142,6 +142,16 @@ export default function AcademicsDashboard() {
 
   const getToken = () => localStorage.getItem("token");
 
+  const getTokenOrRedirect = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      localStorage.removeItem("user");
+      router.push("/login");
+      return null;
+    }
+    return token;
+  };
+
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (!storedUser) {
@@ -237,9 +247,17 @@ export default function AcademicsDashboard() {
   const fetchUsers = async () => {
     setLoadingUsers(true);
     try {
+      const token = getTokenOrRedirect();
+      if (!token) return;
       const res = await fetch("/api/users", {
         headers: { Authorization: `Bearer ${getToken()}` },
       });
+
+      if (res.status === 401) {
+        handleLogout();
+        return;
+      }
+
       const data = await res.json();
       if (res.ok) {
         setUsers(data.users || []);
@@ -385,6 +403,8 @@ export default function AcademicsDashboard() {
     setCreateLoading(true);
 
     try {
+      const token = getTokenOrRedirect();
+      if (!token) return;
       const res = await fetch("/api/users", {
         method: "POST",
         headers: {
@@ -400,6 +420,11 @@ export default function AcademicsDashboard() {
           mobile: newUserMobile,
         }),
       });
+
+      if (res.status === 401) {
+        handleLogout();
+        return;
+      }
 
       const data = await res.json();
 
@@ -484,10 +509,17 @@ export default function AcademicsDashboard() {
     if (!confirm(`Are you sure you want to delete "${userName}"?`)) return;
 
     try {
+      const token = getTokenOrRedirect();
+      if (!token) return;
       const res = await fetch(`/api/users?id=${userId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${getToken()}` },
       });
+
+      if (res.status === 401) {
+        handleLogout();
+        return;
+      }
 
       if (res.ok) {
         fetchUsers();
@@ -515,6 +547,8 @@ export default function AcademicsDashboard() {
     setPasswordLoading(true);
 
     try {
+      const token = getTokenOrRedirect();
+      if (!token) return;
       const res = await fetch("/api/auth/change-password", {
         method: "POST",
         headers: {
@@ -523,6 +557,11 @@ export default function AcademicsDashboard() {
         },
         body: JSON.stringify({ currentPassword, newPassword }),
       });
+
+      if (res.status === 401) {
+        handleLogout();
+        return;
+      }
 
       const data = await res.json();
 
