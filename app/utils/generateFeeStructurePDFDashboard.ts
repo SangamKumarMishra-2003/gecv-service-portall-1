@@ -232,7 +232,7 @@ export const generateFeeStructurePDFDashboard = async (data: {
 
   /* ================= SIGNATURE ================= */
 
-  y = 230;
+  y = 270;
 
   doc.text(
     "Signature of the competent authority",

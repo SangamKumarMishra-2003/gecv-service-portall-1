@@ -1,0 +1,40 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  width: 450px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.table th {
+  background: #1e293b;
+  color: white;
+  padding: 10px;
+}
+
+.table td {
+  padding: 8px;
+  border-bottom: 1px solid #ddd;
+}
+
+.closeBtn {
+  margin-top: 15px;
+  background: #ef4444;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+}

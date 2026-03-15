@@ -1,0 +1,40 @@
+.sidebar {
+  width: 240px;
+  background: #0f172a;
+  color: white;
+  height: 100vh;
+  padding: 25px;
+}
+
+.logo {
+  font-size: 22px;
+  margin-bottom: 30px;
+}
+
+.navList {
+  list-style: none;
+  padding: 0;
+}
+
+.navList li {
+  margin-bottom: 10px;
+}
+
+.navList a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: white;
+  padding: 10px;
+  border-radius: 8px;
+  transition: 0.2s;
+}
+
+.navList a:hover {
+  background: #1e293b;
+}
+
+.active a {
+  background: #2563eb;
+}
