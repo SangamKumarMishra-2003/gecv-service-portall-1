@@ -109,43 +109,6 @@ interface Notification {
   createdAt: string;
 }
 
-interface HostelApplication {
-  _id: string;
-  studentId: Student;
-  fullName: string;
-  regNo: string;
-  applicationNo: string;
-  gender: string;
-  dob: string;
-  category: string;
-  nationality: string;
-  bloodGroup: string;
-  aadhaarNo: string;
-  collegeName: string;
-  course: string;
-  branch: string;
-  yearSemester: string;
-  academicSession: string;
-  admissionMode: string;
-  permanentAddress: string;
-  cityVillage: string;
-  district: string;
-  state: string;
-  pinCode: string;
-  fatherName: string;
-  motherName: string;
-  guardianName?: string;
-  occupation: string;
-  mobileNo: string;
-  alternateMobileNo?: string;
-  emailId: string;
-  hostelType: string;
-  roomPreference: string;
-  floorPreference?: string;
-  status: "Pending" | "Approved" | "Rejected";
-  rejectionReason?: string;
-  createdAt: string;
-}
 
 export default function AcademicsDashboard() {
   const router = useRouter();
@@ -212,16 +175,6 @@ export default function AcademicsDashboard() {
   const [editSuccess, setEditSuccess] = useState("");
   const [editLoading, setEditLoading] = useState(false);
 
-  // Hostel Applications State
-  const [hostelApps, setHostelApps] = useState<HostelApplication[]>([]);
-  const [loadingHostelApps, setLoadingHostelApps] = useState(false);
-  const [hostelAppsFilter, setHostelAppsFilter] = useState<"Pending" | "Approved" | "Rejected">("Pending");
-  const [selectedHostelApp, setSelectedHostelApp] = useState<HostelApplication | null>(null);
-  const [hostelActionType, setHostelActionType] = useState<"approve" | "reject" | null>(null);
-  const [hostelRejectionReason, setHostelRejectionReason] = useState("");
-  const [hostelActionLoading, setHostelActionLoading] = useState(false);
-  const [hostelActionError, setHostelActionError] = useState("");
-
   // CSV Import State
   const [showCSVModal, setShowCSVModal] = useState(false);
   const [csvFileName, setCsvFileName] = useState<string>("");
@@ -232,7 +185,7 @@ export default function AcademicsDashboard() {
   const [csvRowCount, setCsvRowCount] = useState(0);
 
   // Active Tab
-  const [activeTab, setActiveTab] = useState<"profile" | "requests" | "users" | "hostel">("requests");
+  const [activeTab, setActiveTab] = useState<"profile" | "requests" | "users">("requests");
 
   const getToken = () => localStorage.getItem("token");
 
@@ -261,11 +214,9 @@ export default function AcademicsDashboard() {
       fetchUsers();
     } else if (activeTab === "requests") {
       fetchRequests();
-    } else if (activeTab === "hostel") {
-      fetchHostelApps();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, requestsFilter, filterService, hostelAppsFilter]);
+  }, [activeTab, requestsFilter, filterService]);
 
   // Service type mapping
   const serviceLabels: Record<string, string> = {
@@ -342,23 +293,6 @@ export default function AcademicsDashboard() {
     }
   };
 
-  // ---------------- Hostel ----------------
-  const fetchHostelApps = async () => {
-    setLoadingHostelApps(true);
-    try {
-      const res = await fetch(`/api/hostel-applications?status=${hostelAppsFilter}`, {
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setHostelApps(data.applications || []);
-      }
-    } catch (err) {
-      console.error("Failed to fetch hostel applications");
-    } finally {
-      setLoadingHostelApps(false);
-    }
-  };
 
   // ---------------- Users ----------------
   const fetchUsers = async () => {
@@ -548,74 +482,6 @@ export default function AcademicsDashboard() {
     }
   };
 
-  // Approve Hostel App
-  const handleApproveHostelApp = async () => {
-    if (!selectedHostelApp) return;
-    setHostelActionLoading(true);
-    setHostelActionError("");
-
-    try {
-      const res = await fetch(`/api/hostel-applications/${selectedHostelApp._id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${getToken()}`,
-        },
-        body: JSON.stringify({ action: "approve" }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message);
-      }
-
-      setSelectedHostelApp(null);
-      setHostelActionType(null);
-      fetchHostelApps();
-    } catch (err: any) {
-      setHostelActionError(err.message || "Failed to approve application");
-    } finally {
-      setHostelActionLoading(false);
-    }
-  };
-
-  // Reject Hostel App
-  const handleRejectHostelApp = async () => {
-    if (!selectedHostelApp || !hostelRejectionReason.trim()) {
-      setHostelActionError("Please provide a reason for rejection");
-      return;
-    }
-
-    setHostelActionLoading(true);
-    setHostelActionError("");
-
-    try {
-      const res = await fetch(`/api/hostel-applications/${selectedHostelApp._id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${getToken()}`,
-        },
-        body: JSON.stringify({ action: "reject", rejectionReason: hostelRejectionReason.trim() }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message);
-      }
-
-      setSelectedHostelApp(null);
-      setHostelActionType(null);
-      setHostelRejectionReason("");
-      fetchHostelApps();
-    } catch (err: any) {
-      setHostelActionError(err.message || "Failed to reject application");
-    } finally {
-      setHostelActionLoading(false);
-    }
-  };
 
   // Create User
   const handleCreateUser = async () => {
@@ -1279,12 +1145,6 @@ const handleImportCSV = async (rawText?: string) => {
           <FileText size={18} /> Service Requests
         </button>
         <button
-          className={`${styles.tab} ${activeTab === "hostel" ? styles.activeTab : ""}`}
-          onClick={() => setActiveTab("hostel")}
-        >
-          <FileText size={18} /> Hostel Applications
-        </button>
-        <button
           className={`${styles.tab} ${activeTab === "users" ? styles.activeTab : ""}`}
           onClick={() => setActiveTab("users")}
         >
@@ -1402,80 +1262,6 @@ const handleImportCSV = async (rawText?: string) => {
         </section>
       )}
 
-      {/* Hostel Applications Tab */}
-      {activeTab === "hostel" && (
-        <section className={styles.requestsSection}>
-          <div className={styles.requestsHeader}>
-            <h2>Hostel Applications</h2>
-            <div className={styles.filterTabs}>
-              {(["Pending", "Approved", "Rejected"] as const).map((status) => (
-                <button
-                  key={status}
-                  className={`${styles.filterBtn} ${hostelAppsFilter === status ? styles.activeFilter : ""}`}
-                  onClick={() => setHostelAppsFilter(status)}
-                >
-                  {status === "Pending" && <Clock size={16} />}
-                  {status === "Approved" && <Check size={16} />}
-                  {status === "Rejected" && <XCircle size={16} />}
-                  {status}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {loadingHostelApps ? (
-            <p className={styles.loadingText}>Loading applications...</p>
-          ) : hostelApps.length === 0 ? (
-            <p className={styles.noData}>No {hostelAppsFilter.toLowerCase()} applications found.</p>
-          ) : (
-            <table className={styles.requestsTable}>
-              <thead>
-                <tr>
-                  <th>Student Name</th>
-                  <th>Reg No</th>
-                  <th>Hostel Type</th>
-                  <th>Room Pref</th>
-                  <th>Date</th>
-                  {hostelAppsFilter === "Pending" && <th>Actions</th>}
-                </tr>
-              </thead>
-              <tbody>
-                {hostelApps.map((app) => (
-                  <tr key={app._id}>
-                    <td>{app.fullName}</td>
-                    <td>{app.regNo}</td>
-                    <td>{app.hostelType}</td>
-                    <td>{app.roomPreference}</td>
-                    <td>{formatDate(app.createdAt)}</td>
-                    {hostelAppsFilter === "Pending" && (
-                      <td className={styles.actionsCell}>
-                        <button
-                          className={styles.approveBtn}
-                          onClick={() => {
-                            setSelectedHostelApp(app);
-                            setHostelActionType("approve");
-                          }}
-                        >
-                          <Check size={16} /> Approve
-                        </button>
-                        <button
-                          className={styles.rejectBtn}
-                          onClick={() => {
-                            setSelectedHostelApp(app);
-                            setHostelActionType("reject");
-                          }}
-                        >
-                          <XCircle size={16} /> Reject
-                        </button>
-                      </td>
-                    )}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </section>
-      )}
 
       {/* Profile Tab */}
       {activeTab === "profile" && (
@@ -1697,97 +1483,6 @@ const handleImportCSV = async (rawText?: string) => {
         </div>
       )}
 
-      {/* Approve Hostel App Modal */}
-      {selectedHostelApp && hostelActionType === "approve" && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modal} style={{ width: '500px', maxHeight: '90vh', overflowY: 'auto' }}>
-            <div className={styles.modalHeader}>
-              <h3>Approve Hostel Application</h3>
-              <button onClick={() => { setSelectedHostelApp(null); setHostelActionType(null); }}>
-                <X />
-              </button>
-            </div>
-
-            <div className={styles.requestDetails}>
-              <p><strong>Name:</strong> {selectedHostelApp.fullName}</p>
-              <p><strong>Reg No:</strong> {selectedHostelApp.regNo}</p>
-              <p><strong>Course & Branch:</strong> {selectedHostelApp.course} ({selectedHostelApp.branch})</p>
-              <p><strong>Hostel Type:</strong> {selectedHostelApp.hostelType}</p>
-              <p><strong>Room Pref:</strong> {selectedHostelApp.roomPreference}</p>
-              {selectedHostelApp.floorPreference && <p><strong>Floor Pref:</strong> {selectedHostelApp.floorPreference}</p>}
-              <p><strong>Address:</strong> {selectedHostelApp.cityVillage}, {selectedHostelApp.district}, {selectedHostelApp.state}</p>
-              <p><strong>Father:</strong> {selectedHostelApp.fatherName}</p>
-              <p><strong>Mobile:</strong> {selectedHostelApp.mobileNo}</p>
-            </div>
-
-            <p className={styles.confirmText}>
-              Are you sure you want to approve this hostel application?
-            </p>
-
-            {hostelActionError && <p className={styles.errorMsg}>{hostelActionError}</p>}
-
-            <div className={styles.modalActions}>
-              <button
-                className={styles.cancelBtn}
-                onClick={() => { setSelectedHostelApp(null); setHostelActionType(null); }}
-              >
-                Cancel
-              </button>
-              <button
-                className={styles.confirmApproveBtn}
-                onClick={handleApproveHostelApp}
-                disabled={hostelActionLoading}
-              >
-                {hostelActionLoading ? "Processing..." : "Approve Application"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Reject Hostel App Modal */}
-      {selectedHostelApp && hostelActionType === "reject" && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modal}>
-            <div className={styles.modalHeader}>
-              <h3>Reject Hostel Application</h3>
-              <button onClick={() => { setSelectedHostelApp(null); setHostelActionType(null); setHostelRejectionReason(""); }}>
-                <X />
-              </button>
-            </div>
-
-            <div className={styles.requestDetails}>
-              <p><strong>Name:</strong> {selectedHostelApp.fullName}</p>
-              <p><strong>Reg No:</strong> {selectedHostelApp.regNo}</p>
-            </div>
-
-            <label>Reason for Rejection *</label>
-            <textarea
-              placeholder="Enter reason for rejecting..."
-              value={hostelRejectionReason}
-              onChange={(e) => setHostelRejectionReason(e.target.value)}
-            />
-
-            {hostelActionError && <p className={styles.errorMsg}>{hostelActionError}</p>}
-
-            <div className={styles.modalActions}>
-              <button
-                className={styles.cancelBtn}
-                onClick={() => { setSelectedHostelApp(null); setHostelActionType(null); setHostelRejectionReason(""); }}
-              >
-                Cancel
-              </button>
-              <button
-                className={styles.confirmRejectBtn}
-                onClick={handleRejectHostelApp}
-                disabled={hostelActionLoading || !hostelRejectionReason.trim()}
-              >
-                {hostelActionLoading ? "Processing..." : "Reject Application"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Create User Modal */}
       {showCreateModal && (

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   PieChart,
   Pie,
@@ -10,17 +11,39 @@ import {
 
 import styles from "./RoomChart.module.scss";
 
-const data = [
-  { name: "Occupied", value: 95 },
-  { name: "Available", value: 25 },
-];
-
-const COLORS = ["#ef4444", "#22c55e"];
+const COLORS = ["#f43f5e", "#10b981"];
 
 export default function RoomOccupancyChart() {
+  const [data, setData] = useState([
+    { name: "Occupied", value: 0 },
+    { name: "Available", value: 0 },
+  ]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    fetch("/api/hostel-stats", {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then((res) => res.json())
+      .then((stats) => {
+        setData([
+          { name: "Occupied", value: stats.occupiedRooms || 0 },
+          { name: "Available", value: stats.availableRooms || 0 },
+        ]);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error fetching chart data:", err);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) return <div style={{height: 250, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b'}}>Loading Chart...</div>;
+
   return (
     <div className={styles.chartCard}>
-      <h3>Room Occupancy</h3>
+      <h3>Room Occupancy (Beds)</h3>
 
       <ResponsiveContainer width="100%" height={250}>
         <PieChart>

@@ -50,6 +50,7 @@ interface HostelApplication {
   _id: string;
   hostelType: string;
   roomPreference: string;
+  floorPreference?: string;
   status: "Pending" | "Approved" | "Rejected";
   rejectionReason?: string;
   createdAt: string;
@@ -62,6 +63,7 @@ export default function StudentDashboard() {
   const [hostelApps, setHostelApps] = useState<HostelApplication[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [hosteler, setHosteler] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [requestsLoading, setRequestsLoading] = useState(true);
   const [hostelAppsLoading, setHostelAppsLoading] = useState(true);
@@ -128,6 +130,8 @@ export default function StudentDashboard() {
     fetchHostelApps();
     // Fetch notifications
     fetchNotifications();
+    // Fetch hosteler assignment
+    fetchHostelerInfo();
   }, [router]);
 
   const getToken = () => localStorage.getItem("token");
@@ -178,6 +182,20 @@ export default function StudentDashboard() {
       }
     } catch (err) {
       console.error("Failed to fetch notifications");
+    }
+  };
+
+  const fetchHostelerInfo = async () => {
+    try {
+      const res = await fetch("/api/hostelers", {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setHosteler(data.hosteler);
+      }
+    } catch (err) {
+      console.error("Failed to fetch hosteler info");
     }
   };
 
@@ -480,6 +498,18 @@ export default function StudentDashboard() {
           <button className={styles.changePasswordBtn} onClick={() => setShowPasswordModal(true)}>
             <Lock size={16} /> Change Password
           </button>
+        </section>
+      )}
+
+      {/* Assigned Hostel */}
+      {hosteler && (
+        <section className={styles.studentInfo} style={{ marginTop: '24px', borderLeft: '4px solid #10b981' }}>
+          <h2>Assigned Hostel Room</h2>
+          <div className={styles.infoGrid}>
+            <p><strong>Room No:</strong> {hosteler.room?.roomNo || "Allocated"}</p>
+            <p><strong>Bed No:</strong> {hosteler.bedNo || "N/A"}</p>
+            <p><strong>Floor:</strong> {hosteler.room?.floor || "N/A"}</p>
+          </div>
         </section>
       )}
 
@@ -786,16 +816,19 @@ export default function StudentDashboard() {
             <thead>
               <tr>
                 <th>Hostel Type</th>
-                <th>Room Preference</th>
-                <th>Applied On</th>
+                <th>Preference</th>
+                <th>Applied Date</th>
                 <th>Status</th>
               </tr>
             </thead>
             <tbody>
               {hostelApps.map((app) => (
                 <tr key={app._id}>
-                  <td>{app.hostelType}</td>
-                  <td>{app.roomPreference}</td>
+                  <td>{app.hostelType === "Boys" ? "Boys Hostel" : app.hostelType === "Girls" ? "Girls Hostel" : app.hostelType}</td>
+                  <td>
+                    {app.roomPreference} Sharing
+                    {app.floorPreference && <span style={{ display: 'block', fontSize: '11px', color: '#64748b' }}>Floor: {app.floorPreference}</span>}
+                  </td>
                   <td>{formatDate(app.createdAt)}</td>
                   <td>
                     <span className={`${styles.statusBadge} ${styles[app.status.toLowerCase()]}`}>

@@ -23,9 +23,10 @@ async function verifyAuth(req: Request) {
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const auth = await verifyAuth(req);
     if (!auth) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
@@ -58,7 +59,7 @@ export async function PATCH(
 
     await connectToDatabase();
 
-    const application = await HostelApplication.findById(params.id);
+    const application = await HostelApplication.findById(id);
     if (!application) {
       return NextResponse.json(
         { message: "Application not found" },
@@ -66,7 +67,7 @@ export async function PATCH(
       );
     }
 
-    if (application.status !== "Pending") {
+    if (application.status !== "Pending" && !(application.status === "Approved" && action === "approve")) {
       return NextResponse.json(
         { message: `Application is already ${application.status.toLowerCase()}` },
         { status: 400 }

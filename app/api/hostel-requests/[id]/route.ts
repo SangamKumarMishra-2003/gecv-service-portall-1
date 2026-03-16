@@ -3,9 +3,9 @@ import dbConnect from "../../../../lib/db";
 import HostelRequest from "../../../../models/HostelRequest";
 import Hosteler from "../../../../models/Hosteler";
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   await dbConnect();
-  const { id } = params;
+  const { id } = await params;
   const { action } = await req.json();
   const hostelRequest = await HostelRequest.findById(id);
   if (!hostelRequest) {

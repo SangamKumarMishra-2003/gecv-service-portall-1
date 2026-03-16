@@ -1,6 +1,14 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema, Document, model, models } from "mongoose";
 
-const HostelRequestSchema = new Schema({
+export interface IHostelRequest extends Document {
+  student: mongoose.Types.ObjectId;
+  roomType: string;
+  agreementUrl?: string;
+  status: "pending" | "approved" | "rejected";
+  createdAt: Date;
+}
+
+const HostelRequestSchema = new Schema<IHostelRequest>({
   student: {
     type: Schema.Types.ObjectId,
     ref: "User",
@@ -12,4 +20,6 @@ const HostelRequestSchema = new Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-export default mongoose.models.HostelRequest || mongoose.model("HostelRequest", HostelRequestSchema);
+const HostelRequest = models.HostelRequest || model<IHostelRequest>("HostelRequest", HostelRequestSchema);
+
+export default HostelRequest;

@@ -16,7 +16,7 @@ async function verifyAcademics(req: Request) {
   try {
     const token = authHeader.split(" ")[1];
     const decoded: any = jwt.verify(token, JWT_SECRET);
-    if (decoded.role !== "academics") {
+    if (decoded.role !== "academics" && decoded.role !== "hostel-incharge") {
       return null;
     }
     return decoded;
