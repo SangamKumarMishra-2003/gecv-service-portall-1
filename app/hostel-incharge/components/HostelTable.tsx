@@ -94,10 +94,11 @@ export default function HostelTable() {
 
   const [search, setSearch] = useState("");
 
+  const normalizedSearch = search.toLowerCase();
   const filteredHostels = hostels.filter(
     (h) =>
-      h.name.toLowerCase().includes(search.toLowerCase()) ||
-      h.type.toLowerCase().includes(search.toLowerCase())
+      (h.name || "").toLowerCase().includes(normalizedSearch) ||
+      (h.type || "").toLowerCase().includes(normalizedSearch)
   );
 
   if (loading) return <div>Loading hostels...</div>;
@@ -198,7 +199,7 @@ export default function HostelTable() {
                   type="number"
                   required
                   value={newHostel.totalRooms}
-                  onChange={(e) => setNewHostel({ ...newHostel, totalRooms: parseInt(e.target.value) })}
+                  onChange={(e) => setNewHostel({ ...newHostel, totalRooms: Number(e.target.value) || 0 })}
                 />
               </div>
               <div className={styles.modalActions}>
@@ -244,7 +245,7 @@ export default function HostelTable() {
                   type="number"
                   required
                   value={editingHostel.totalRooms}
-                  onChange={(e) => setEditingHostel({ ...editingHostel, totalRooms: parseInt(e.target.value) })}
+                  onChange={(e) => setEditingHostel({ ...editingHostel, totalRooms: Number(e.target.value) || 0 })}
                 />
               </div>
               <div className={styles.modalActions}>
@@ -265,7 +266,7 @@ export default function HostelTable() {
           <div className={styles.modal}>
             <div className={styles.modalHeader}>
                 <h3>{viewingHostel.name} - Detailed View</h3>
-                <button className={styles.closeBtn} onClick={() => setShowDetailsModal(false)}>×</button>
+                <button className={styles.closeBtn} onClick={() => setShowDetailsModal(false)}>x</button>
             </div>
             <div className={styles.detailsContent}>
                 <p><strong>Hostel Type:</strong> {viewingHostel.type}</p>

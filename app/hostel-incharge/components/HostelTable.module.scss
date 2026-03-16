@@ -1,5 +1,5 @@
 .container {
-  padding: 1rem;
+  padding: 0;
 }
 
 .header {
@@ -14,16 +14,16 @@
   flex: 1;
   padding: 0.8rem 1.2rem;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.05);
-  color: white;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #0f172a;
   font-size: 0.95rem;
   transition: all 0.3s ease;
 
   &:focus {
     outline: none;
     border-color: #3b82f6;
-    background: rgba(255, 255, 255, 0.1);
+    background: #ffffff;
     box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
   }
 }
@@ -49,11 +49,10 @@
 }
 
 .tableWrapper {
-  background: rgba(255, 255, 255, 0.03);
+  background: #ffffff;
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  overflow: hidden;
-  backdrop-filter: blur(10px);
+  border: 1px solid #e2e8f0;
+  overflow: auto;
 }
 
 .table {
@@ -63,7 +62,7 @@
 
   th {
     padding: 1.2rem 1.5rem;
-    background: rgba(255, 255, 255, 0.05);
+    background: #f8fafc;
     color: #94a3b8;
     font-size: 0.85rem;
     font-weight: 600;
@@ -73,8 +72,8 @@
 
   td {
     padding: 1.2rem 1.5rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    color: #e2e8f0;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
     font-size: 0.95rem;
   }
 
@@ -83,7 +82,7 @@
   }
 
   tr:hover td {
-    background: rgba(255, 255, 255, 0.02);
+    background: #f8fafc;
   }
 }
 
@@ -147,25 +146,25 @@
     h3 {
         margin: 0;
         font-size: 1.25rem;
-        color: white;
+        color: #0f172a;
     }
 
     .closeBtn {
         background: none;
         border: none;
         font-size: 1.5rem;
-        color: #94a3b8;
+        color: #64748b;
         cursor: pointer;
         padding: 0.2rem;
         
         &:hover {
-            color: white;
+            color: #0f172a;
         }
     }
 }
 
 .detailsContent {
-    background: rgba(255, 255, 255, 0.05);
+    background: #f8fafc;
     padding: 1.25rem;
     border-radius: 8px;
     margin-bottom: 1.5rem;
@@ -173,10 +172,10 @@
     p {
         margin: 0.75rem 0;
         font-size: 14px;
-        color: #cbd5e1;
+        color: #334155;
 
         strong {
-            color: #94a3b8;
+            color: #64748b;
             display: inline-block;
             width: 140px;
         }
@@ -202,8 +201,8 @@
 }
 
 .modal {
-  background: #1e293b;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   border-radius: 20px;
   width: 100%;
   max-width: 500px;
@@ -212,7 +211,7 @@
 
   h3 {
     margin: 0 0 1.5rem 0;
-    color: white;
+    color: #0f172a;
     font-size: 1.5rem;
   }
 }
@@ -223,17 +222,17 @@
   label {
     display: block;
     margin-bottom: 0.5rem;
-    color: #94a3b8;
+    color: #64748b;
     font-size: 0.9rem;
   }
 
   input, select {
     width: 100%;
     padding: 0.8rem 1rem;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
     border-radius: 10px;
-    color: white;
+    color: #0f172a;
     font-size: 1rem;
 
     &:focus {
@@ -243,8 +242,8 @@
   }
 
   select option {
-    background: #1e293b;
-    color: white;
+    background: #ffffff;
+    color: #0f172a;
   }
 }
 
@@ -257,16 +256,16 @@
 
 .cancelBtn {
   background: transparent;
-  color: #94a3b8;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #64748b;
+  border: 1px solid #e2e8f0;
   padding: 0.8rem 1.5rem;
   border-radius: 10px;
   font-weight: 600;
   cursor: pointer;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.05);
-    color: white;
+    background: #f8fafc;
+    color: #0f172a;
   }
 }
 
@@ -281,5 +280,43 @@
 
   &:hover {
     background: #2563eb;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .addBtn {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .table {
+    th, td {
+      padding: 12px 10px;
+      font-size: 13px;
+    }
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+
+  .modal {
+    padding: 20px 16px;
+  }
+
+  .modalActions {
+    margin-top: 16px;
+    flex-direction: column;
+
+    .cancelBtn, .submitBtn {
+      width: 100%;
+    }
   }
 }

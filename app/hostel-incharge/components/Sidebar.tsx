@@ -1,11 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import styles from "./Sidebar.module.scss";
 import { 
   BarChart3, 
-  Users, 
   Bed, 
   CreditCard, 
   ClipboardList,
@@ -18,6 +17,25 @@ import {
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const navItems = [
+    { href: "/hostel-incharge/dashboard", label: "Dashboard Overview", icon: BarChart3 },
+    { href: "/hostel-incharge/applications", label: "Applications", icon: ClipboardList },
+    { href: "/hostel-incharge/hostels", label: "Hostel Management", icon: Building2 },
+    { href: "/hostel-incharge/students", label: "Student Details", icon: Contact },
+    { href: "/hostel-incharge/residents", label: "Resident Directory", icon: UserCheck },
+    { href: "/hostel-incharge/rooms", label: "Room Inventory", icon: Bed },
+    { href: "/hostel-incharge/fees", label: "Fee Collection", icon: CreditCard },
+  ];
+
+  const handleLogout = () => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+    }
+    router.push("/login");
+  };
 
   return (
     <aside className={styles.sidebar}>
@@ -29,54 +47,18 @@ export default function Sidebar() {
 
         <nav className={styles.nav}>
           <ul className={styles.navList}>
-            <li className={pathname.includes("/hostel-incharge/dashboard") ? styles.active : ""}>
-              <a href="/hostel-incharge/dashboard">
-                <BarChart3 size={18} />
-                <span>Dashboard Overview</span>
-              </a>
-            </li>
-
-            <li className={pathname.includes("/hostel-incharge/applications") ? styles.active : ""}>
-              <a href="/hostel-incharge/applications">
-                <ClipboardList size={18} />
-                <span>Applications</span>
-              </a>
-            </li>
-
-            <li className={pathname.includes("/hostel-incharge/hostels") ? styles.active : ""}>
-              <a href="/hostel-incharge/hostels">
-                <Building2 size={18} />
-                <span>Hostel Management</span>
-              </a>
-            </li>
-
-            <li className={pathname.includes("/hostel-incharge/students") ? styles.active : ""}>
-              <a href="/hostel-incharge/students">
-                <Contact size={18} />
-                <span>Student Details</span>
-              </a>
-            </li>
-
-            <li className={pathname.includes("/hostel-incharge/residents") ? styles.active : ""}>
-              <a href="/hostel-incharge/residents">
-                <UserCheck size={18} />
-                <span>Resident Directory</span>
-              </a>
-            </li>
-
-            <li className={pathname.includes("/hostel-incharge/rooms") ? styles.active : ""}>
-              <a href="/hostel-incharge/rooms">
-                <Bed size={18} />
-                <span>Room Inventory</span>
-              </a>
-            </li>
-
-            <li className={pathname.includes("/hostel-incharge/fees") ? styles.active : ""}>
-              <a href="/hostel-incharge/fees">
-                <CreditCard size={18} />
-                <span>Fee Collection</span>
-              </a>
-            </li>
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+              return (
+                <li key={item.href} className={isActive ? styles.active : ""}>
+                  <Link href={item.href}>
+                    <Icon size={18} />
+                    <span>{item.label}</span>
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </nav>
       </div>
@@ -89,7 +71,7 @@ export default function Sidebar() {
             <p className={styles.userRole}>Hostel Incharge</p>
           </div>
         </div>
-        <button className={styles.logoutBtn}>
+        <button className={styles.logoutBtn} onClick={handleLogout}>
           <LogOut size={16} />
           <span>Logout System</span>
         </button>

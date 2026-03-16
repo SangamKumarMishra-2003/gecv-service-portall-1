@@ -17,8 +17,8 @@ interface Fee {
 
 interface Student {
   _id: string;
-  name: string;
-  regNo: string;
+  name?: string;
+  regNo?: string;
   rollNo?: string;
 }
 
@@ -99,16 +99,19 @@ export default function FeeTable() {
     }
   };
 
+  const normalizedSearch = studentSearch.toLowerCase();
+  const normalizedFeeSearch = search.toLowerCase();
+
   const filteredFees = fees.filter((fee) =>
-    fee.student?.name.toLowerCase().includes(search.toLowerCase()) ||
-    fee.student?.regNo.toLowerCase().includes(search.toLowerCase()) ||
-    fee.transactionId?.toLowerCase().includes(search.toLowerCase())
+    (fee.student?.name || "").toLowerCase().includes(normalizedFeeSearch) ||
+    (fee.student?.regNo || "").toLowerCase().includes(normalizedFeeSearch) ||
+    (fee.transactionId || "").toLowerCase().includes(normalizedFeeSearch)
   );
 
   const filteredStudents = students.filter(s =>
-    s.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
-    s.regNo.toLowerCase().includes(studentSearch.toLowerCase()) ||
-    s.rollNo?.toLowerCase().includes(studentSearch.toLowerCase())
+    (s.name || "").toLowerCase().includes(normalizedSearch) ||
+    (s.regNo || "").toLowerCase().includes(normalizedSearch) ||
+    (s.rollNo || "").toLowerCase().includes(normalizedSearch)
   ).slice(0, 5);
 
   const formatDate = (dateString: string) => {
@@ -158,7 +161,7 @@ export default function FeeTable() {
                    <td>{fee.student?.name || "Unknown"}</td>
                   <td>{fee.student?.regNo || "N/A"}</td>
                   <td>
-                      <div style={{fontWeight: 'bold', color: '#16a34a'}}>₹{fee.amount}</div>
+                      <div style={{fontWeight: 'bold', color: '#16a34a'}}>Rs. {fee.amount}</div>
                   </td>
                   <td>
                       <div>{fee.paymentMode}</div>
@@ -206,7 +209,7 @@ export default function FeeTable() {
                 </div>
               </div>
               <div className={styles.formGroup}>
-                <label>Amount (₹)</label>
+                <label>Amount (Rs.)</label>
                 <input
                   type="number"
                   required
@@ -244,4 +247,4 @@ export default function FeeTable() {
       )}
     </div>
   );
-}
+}

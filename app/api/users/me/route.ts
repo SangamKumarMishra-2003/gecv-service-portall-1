@@ -6,11 +6,26 @@ import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret";
 
-export async function GET() {
+type AuthPayload = {
+  userId?: string;
+  email?: string;
+};
+
+function getBearerToken(req: Request): string | null {
+  const authHeader = req.headers.get("authorization");
+  if (!authHeader?.startsWith("Bearer ")) {
+    return null;
+  }
+  return authHeader.split(" ")[1] || null;
+}
+
+export async function GET(req: Request) {
   try {
-    // Get token from cookies (Next.js App Router way)
+    // Prefer Authorization header; fallback to cookie for browser sessions.
+    const bearerToken = getBearerToken(req);
     const cookieStore = await cookies();
-    const token = cookieStore.get("token")?.value;
+    const cookieToken = cookieStore.get("token")?.value;
+    const token = bearerToken || cookieToken;
 
     if (!token) {
       return NextResponse.json(
@@ -19,11 +34,10 @@ export async function GET() {
       );
     }
 
-    // Verify JWT
-    let decoded: any;
+    let decoded: AuthPayload;
 
     try {
-      decoded = jwt.verify(token, JWT_SECRET);
+      decoded = jwt.verify(token, JWT_SECRET) as AuthPayload;
     } catch {
       return NextResponse.json(
         { message: "Invalid token" },
@@ -31,13 +45,15 @@ export async function GET() {
       );
     }
 
-    // Connect DB
     await connectToDatabase();
 
-    // Make sure 'email' exists in your User schema, otherwise use a valid field
-    const user = await (User as any).findOne(
-      { email: decoded.email as string }
-    ).select("-password");
+    let user = null;
+    if (decoded.userId) {
+      user = await (User as any).findById(decoded.userId).select("-password");
+    }
+    if (!user && decoded.email) {
+      user = await (User as any).findOne({ email: decoded.email }).select("-password");
+    }
 
     if (!user) {
       return NextResponse.json(
