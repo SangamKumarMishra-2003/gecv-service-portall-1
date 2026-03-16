@@ -46,18 +46,41 @@ interface Notification {
   relatedRequestId?: { serviceType: string; status: string };
 }
 
+interface HostelApplication {
+  _id: string;
+  hostelType: string;
+  roomPreference: string;
+  floorPreference?: string;
+  status: "Pending" | "Approved" | "Rejected";
+  rejectionReason?: string;
+  createdAt: string;
+}
+
 export default function StudentDashboard() {
   const router = useRouter();
   const [student, setStudent] = useState<Student | null>(null);
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
+  const [hostelApps, setHostelApps] = useState<HostelApplication[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [hosteler, setHosteler] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [requestsLoading, setRequestsLoading] = useState(true);
+  const [hostelAppsLoading, setHostelAppsLoading] = useState(true);
 
   // Modal State
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [purpose, setPurpose] = useState("");
+
+  // Fee input state for Fee Structure
+  const [paymentDate, setPaymentDate] = useState("");
+  const [transactionId, setTransactionId] = useState("");
+  const [admissionFee, setAdmissionFee] = useState("");
+  const [tuitionFee, setTuitionFee] = useState("");
+  const [registrationFee, setRegistrationFee] = useState("");
+  const [examFee, setExamFee] = useState("");
+  const [developmentFee, setDevelopmentFee] = useState("");
+  const [otherCharges, setOtherCharges] = useState("");
   
   // Service Specific State
   const [purposeType, setPurposeType] = useState<string>("");
@@ -103,8 +126,12 @@ export default function StudentDashboard() {
 
     // Fetch service requests
     fetchRequests();
+    // Fetch hostel applications
+    fetchHostelApps();
     // Fetch notifications
     fetchNotifications();
+    // Fetch hosteler assignment
+    fetchHostelerInfo();
   }, [router]);
 
   const getToken = () => localStorage.getItem("token");
@@ -126,6 +153,23 @@ export default function StudentDashboard() {
     }
   };
 
+  const fetchHostelApps = async () => {
+    setHostelAppsLoading(true);
+    try {
+      const res = await fetch("/api/hostel-applications", {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setHostelApps(data.applications || []);
+      }
+    } catch (err) {
+      console.error("Failed to fetch hostel applications");
+    } finally {
+      setHostelAppsLoading(false);
+    }
+  };
+
   const fetchNotifications = async () => {
     try {
       const res = await fetch("/api/notifications", {
@@ -138,6 +182,20 @@ export default function StudentDashboard() {
       }
     } catch (err) {
       console.error("Failed to fetch notifications");
+    }
+  };
+
+  const fetchHostelerInfo = async () => {
+    try {
+      const res = await fetch("/api/hostelers", {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setHosteler(data.hosteler);
+      }
+    } catch (err) {
+      console.error("Failed to fetch hosteler info");
     }
   };
 
@@ -175,7 +233,15 @@ export default function StudentDashboard() {
     
     // Service-specific validation
     if (selectedService === "Bonafide" && !purposeType) { setSubmitError("Please select a purpose type"); return; }
-    if (selectedService === "FeeStructure" && !academicYear) { setSubmitError("Please enter academic year"); return; }
+    if (selectedService === "FeeStructure") {
+      if (!academicYear) { setSubmitError("Please enter academic year"); return; }
+      if (!purposeType) { setSubmitError("Please select purpose"); return; }
+      const yearMatch = academicYear.match(/^(\d{4})-(\d{4})$/);
+      if (!yearMatch) { setSubmitError("Academic year must be in YYYY-YYYY format"); return; }
+      const start = parseInt(yearMatch[1]);
+      const end = parseInt(yearMatch[2]);
+      if (end <= start) { setSubmitError("End year must be greater than start year"); return; }
+    }
     if (selectedService === "TC" && (!reasonForLeaving || !lastSemesterCompleted)) { setSubmitError("Please fill all required fields"); return; }
     if (selectedService === "NOC" && (!purposeType || !organizationName)) { setSubmitError("Please fill all required fields"); return; }
     if (selectedService === "CharacterCertificate" && !purposeType) { setSubmitError("Please select a purpose type"); return; }
@@ -201,6 +267,13 @@ export default function StudentDashboard() {
           lastSemesterCompleted: Number(lastSemesterCompleted),
           organizationName,
           departmentClearances: selectedService === "NoDues" ? departmentClearances : undefined,
+          // Fee fields for Fee Structure
+          admissionFee: selectedService === "FeeStructure" ? admissionFee : undefined,
+          tuitionFee: selectedService === "FeeStructure" ? tuitionFee : undefined,
+          registrationFee: selectedService === "FeeStructure" ? registrationFee : undefined,
+          examFee: selectedService === "FeeStructure" ? examFee : undefined,
+          developmentFee: selectedService === "FeeStructure" ? developmentFee : undefined,
+          otherCharges: selectedService === "FeeStructure" ? otherCharges : undefined,
         }),
       });
 
@@ -227,6 +300,12 @@ export default function StudentDashboard() {
           accounts: false,
           sports: false,
         });
+        setAdmissionFee("");
+        setTuitionFee("");
+        setRegistrationFee("");
+        setExamFee("");
+        setDevelopmentFee("");
+        setOtherCharges("");
         setSubmitSuccess("");
       }, 1500);
     } catch (err: unknown) {
@@ -422,6 +501,18 @@ export default function StudentDashboard() {
         </section>
       )}
 
+      {/* Assigned Hostel */}
+      {hosteler && (
+        <section className={styles.studentInfo} style={{ marginTop: '24px', borderLeft: '4px solid #10b981' }}>
+          <h2>Assigned Hostel Room</h2>
+          <div className={styles.infoGrid}>
+            <p><strong>Room No:</strong> {hosteler.room?.roomNo || "Allocated"}</p>
+            <p><strong>Bed No:</strong> {hosteler.bedNo || "N/A"}</p>
+            <p><strong>Floor:</strong> {hosteler.room?.floor || "N/A"}</p>
+          </div>
+        </section>
+      )}
+
       {/* Services */}
       <section className={styles.services}>
         <h2>Apply for Services</h2>
@@ -459,6 +550,7 @@ export default function StudentDashboard() {
                   value={purposeType} 
                   onChange={(e) => setPurposeType(e.target.value)}
                   className={styles.selectInput}
+                  required
                 >
                   <option value="">Select Purpose</option>
                   <option value="Education">Education Loan</option>
@@ -479,9 +571,55 @@ export default function StudentDashboard() {
                   value={academicYear}
                   onChange={(e) => setAcademicYear(e.target.value)}
                   className={styles.textInput}
+                  pattern="^\d{4}-\d{4}$"
+                  title="Academic year must be in YYYY-YYYY format"
+                  required
                 />
+                <label>Purpose *</label>
+                <select 
+                  value={purposeType} 
+                  onChange={(e) => setPurposeType(e.target.value)}
+                  className={styles.selectInput}
+                  required
+                >
+                  <option value="">Select Purpose</option>
+                  <option value="State Level">State Level PMS</option>
+                  <option value="Central Level">Central Level NSP</option>
+                  <option value="Credit Card">Credit Card</option>
+                  <option value="Bank Loan">Bank Loan</option>
+                </select>
+
+                {/* Fee Input Form - visible after purpose is selected */}
+                {purposeType && (
+                  <div style={{marginTop: '1rem', padding: '1rem', background: '#f8fafc', borderRadius: 8}}>
+                    <h4 style={{marginBottom: 8}}>Enter Fee Details</h4>
+                    <label>paymentDate</label>
+                    <input type="date" className={styles.textInput} value={paymentDate} onChange={e => setPaymentDate(e.target.value)} required />
+                    <label>Transaction ID</label>
+                    <input type="string" min="0" className={styles.textInput} placeholder="Transaction ID" value={transactionId} onChange={e => setTransactionId(e.target.value)} required />
+                    <label>Admission Fee</label>
+                    <input type="number" min="0" className={styles.textInput} placeholder="Admission Fee" value={admissionFee} onChange={e => setAdmissionFee(e.target.value)} required />
+                    <label>Tuition Fee</label>
+                    <input type="number" min="0" className={styles.textInput} placeholder="Tuition Fee" value={tuitionFee} onChange={e => setTuitionFee(e.target.value)} required />
+                    <label>Registration Fee</label>
+                    <input type="number" min="0" className={styles.textInput} placeholder="Registration Fee" value={registrationFee} onChange={e => setRegistrationFee(e.target.value)} required />
+                    <label>Exam Fee</label>
+                    <input type="number" min="0" className={styles.textInput} placeholder="Exam Fee" value={examFee} onChange={e => setExamFee(e.target.value)} required />
+                    <label>Development Fee</label>
+                    <input type="number" min="0" className={styles.textInput} placeholder="Development Fee" value={developmentFee} onChange={e => setDevelopmentFee(e.target.value)} required />
+                    <label>Other Charges</label>
+                    <input type="number" min="0" className={styles.textInput} placeholder="Other Charges" value={otherCharges} onChange={e => setOtherCharges(e.target.value)} required />
+                  </div>
+                )}
               </>
             )}
+{/* // Fee input state for Fee Structure
+  const [admissionFee, setAdmissionFee] = useState("");
+  const [tuitionFee, setTuitionFee] = useState("");
+  const [registrationFee, setRegistrationFee] = useState("");
+  const [examFee, setExamFee] = useState("");
+  const [developmentFee, setDevelopmentFee] = useState("");
+  const [otherCharges, setOtherCharges] = useState(""); */}
 
             {/* Transfer Certificate */}
             {selectedService === "TC" && (
@@ -491,6 +629,8 @@ export default function StudentDashboard() {
                   placeholder="Reason for applying for TC..."
                   value={reasonForLeaving}
                   onChange={(e) => setReasonForLeaving(e.target.value)}
+                  required
+                  minLength={10}
                 />
                 <label>Last Semester Completed *</label>
                 <input
@@ -499,6 +639,9 @@ export default function StudentDashboard() {
                   value={lastSemesterCompleted}
                   onChange={(e) => setLastSemesterCompleted(e.target.value)}
                   className={styles.textInput}
+                  required
+                  min="1"
+                  max="8"
                 />
               </>
             )}
@@ -511,6 +654,7 @@ export default function StudentDashboard() {
                   value={purposeType} 
                   onChange={(e) => setPurposeType(e.target.value)}
                   className={styles.selectInput}
+                  required
                 >
                   <option value="">Select Purpose</option>
                   <option value="HigherStudies">Higher Studies</option>
@@ -528,6 +672,7 @@ export default function StudentDashboard() {
                   value={purposeType} 
                   onChange={(e) => setPurposeType(e.target.value)}
                   className={styles.selectInput}
+                  required
                 >
                   <option value="">Select Purpose</option>
                   <option value="Internship">Internship</option>
@@ -541,6 +686,7 @@ export default function StudentDashboard() {
                   value={organizationName}
                   onChange={(e) => setOrganizationName(e.target.value)}
                   className={styles.textInput}
+                  required
                 />
               </>
             )}
@@ -579,6 +725,8 @@ export default function StudentDashboard() {
               placeholder="Enter details..."
               value={purpose}
               onChange={(e) => setPurpose(e.target.value)}
+              required
+              minLength={10}
             />
 
             {submitError && <p className={styles.errorMsg}>{submitError}</p>}
@@ -638,6 +786,59 @@ export default function StudentDashboard() {
                       >
                         <Download size={16} /> Download
                       </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </section>
+
+      {/* Hostel Applications Status */}
+      <section className={styles.status}>
+        <h2>Hostel Application Status</h2>
+        {hostelAppsLoading ? (
+          <p>Loading hostel applications...</p>
+        ) : hostelApps.length === 0 ? (
+          <div className={styles.noData} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+            <p>No hostel applications submitted.</p>
+            <button 
+              className={styles.sendBtn} 
+              style={{ width: 'auto', padding: '0.5rem 1rem' }}
+              onClick={() => router.push('/hostel-services')}
+            >
+              Apply for Hostel
+            </button>
+          </div>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>Hostel Type</th>
+                <th>Preference</th>
+                <th>Applied Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {hostelApps.map((app) => (
+                <tr key={app._id}>
+                  <td>{app.hostelType === "Boys" ? "Boys Hostel" : app.hostelType === "Girls" ? "Girls Hostel" : app.hostelType}</td>
+                  <td>
+                    {app.roomPreference} Sharing
+                    {app.floorPreference && <span style={{ display: 'block', fontSize: '11px', color: '#64748b' }}>Floor: {app.floorPreference}</span>}
+                  </td>
+                  <td>{formatDate(app.createdAt)}</td>
+                  <td>
+                    <span className={`${styles.statusBadge} ${styles[app.status.toLowerCase()]}`}>
+                      {app.status === "Pending" && <Clock size={14} />}
+                      {app.status === "Approved" && <CheckCircle size={14} />}
+                      {app.status === "Rejected" && <XCircle size={14} />}
+                      {app.status}
+                    </span>
+                    {app.status === "Rejected" && app.rejectionReason && (
+                      <p className={styles.rejectionReason}>Reason: {app.rejectionReason}</p>
                     )}
                   </td>
                 </tr>

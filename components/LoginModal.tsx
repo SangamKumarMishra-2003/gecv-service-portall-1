@@ -49,6 +49,7 @@ export default function LoginModal({
       // Redirect based on role
       if (role === "Student") router.push("/student/dashboard");
       else if (role === "Faculty") router.push("/faculty/dashboard");
+      else if (role === "Hostel Incharge") router.push("/hostel-incharge");
       else router.push("/academics/dashboard");
 
     } catch (err: any) {

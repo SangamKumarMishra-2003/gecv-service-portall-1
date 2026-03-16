@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/db";
 import ServiceRequest from "@/models/ServiceRequest";
-import User from "@/models/User";
+import "@/models/User";
 import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret";
@@ -38,15 +38,21 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { 
-      serviceType, 
-      purpose, 
-      purposeType, 
-      academicYear, 
-      reasonForLeaving, 
+    const {
+      serviceType,
+      purpose,
+      purposeType,
+      academicYear,
+      reasonForLeaving,
       lastSemesterCompleted,
       organizationName,
-      departmentClearances 
+      departmentClearances,
+      admissionFee,
+      tuitionFee,
+      registrationFee,
+      examFee,
+      developmentFee,
+      otherCharges,
     } = body;
 
     if (!serviceType) {
@@ -97,6 +103,13 @@ export async function POST(req: Request) {
     if (lastSemesterCompleted) requestData.lastSemesterCompleted = lastSemesterCompleted;
     if (organizationName) requestData.organizationName = organizationName;
     if (departmentClearances) requestData.departmentClearances = departmentClearances;
+    // Fee fields for Fee Structure
+    if (admissionFee !== undefined) requestData.admissionFee = Number(admissionFee);
+    if (tuitionFee !== undefined) requestData.tuitionFee = Number(tuitionFee);
+    if (registrationFee !== undefined) requestData.registrationFee = Number(registrationFee);
+    if (examFee !== undefined) requestData.examFee = Number(examFee);
+    if (developmentFee !== undefined) requestData.developmentFee = Number(developmentFee);
+    if (otherCharges !== undefined) requestData.otherCharges = Number(otherCharges);
 
     const serviceRequest = await ServiceRequest.create(requestData);
 

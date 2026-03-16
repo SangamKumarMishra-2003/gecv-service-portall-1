@@ -1,0 +1,85 @@
+.studentSection {
+  display: flex;
+  flex-direction: column;
+}
+
+.search {
+  padding: 12px 20px;
+  width: 100%;
+  max-width: 400px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 24px;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s;
+  background: white;
+
+  &:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+  }
+}
+
+.tableWrapper {
+  width: 100%;
+  overflow-x: auto;
+  background: white;
+  border-radius: 20px;
+  border: 1px solid #f1f5f9;
+}
+
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  text-align: left;
+
+  th {
+    padding: 16px 24px;
+    background: #f8fafc;
+    color: #64748b;
+    font-weight: 700;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  td {
+    padding: 20px 24px;
+    color: #334155;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.2s;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  tr:hover td {
+    background: #f8fafc;
+  }
+}
+
+.activeBadge {
+  padding: 6px 12px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #ecfdf5;
+  color: #059669;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  &::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #10b981;
+  }
+}

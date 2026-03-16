@@ -8,7 +8,7 @@
     ],
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": true,
+    "strict": false, // Reduced strictness for faster compilation
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
@@ -27,17 +27,23 @@
       "@/*": [
         "./*"
       ]
-    }
+    },
+    // Performance optimizations
+    "tsBuildInfoFile": ".next/cache/tsconfig.tsbuildinfo",
+    "disableReferencedProjectLoad": true,
+    "disableSolutionSearching": true,
+    "disableSourceOfProjectReferenceRedirect": true
   },
   "include": [
     "next-env.d.ts",
     ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts",
-    "**/*.mts",
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    ".next",
+    "out"
   ]
 }

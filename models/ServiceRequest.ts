@@ -65,7 +65,7 @@ const ServiceRequestSchema = new Schema(
     // Service-specific fields
     purposeType: {
       type: String,
-      enum: ["Education", "Scholarship", "Internship", "Employment", "Bank", "Passport", "HigherStudies", "Job", "Event", "Visit", "Other"],
+      enum: ["Education", "Scholarship", "Internship", "Employment", "Bank", "Passport", "HigherStudies", "Job", "Event", "Visit", "State Level", "Central Level", "Credit Card", "Other"],
     },
     academicYear: {
       type: String,
@@ -85,6 +85,25 @@ const ServiceRequestSchema = new Schema(
       lab: { type: Boolean, default: false },
       accounts: { type: Boolean, default: false },
       sports: { type: Boolean, default: false },
+    },
+    // Fee fields for Fee Structure
+    admissionFee: {
+      type: Number,
+    },
+    tuitionFee: {
+      type: Number,
+    },
+    registrationFee: {
+      type: Number,
+    },
+    examFee: {
+      type: Number,
+    },
+    developmentFee: {
+      type: Number,
+    },
+    otherCharges: {
+      type: Number,
     },
     // Admin fields
     rejectionReason: {
