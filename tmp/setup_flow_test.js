@@ -39,7 +39,7 @@ async function setupTestData() {
 
         // 2. Create a Hostel
         const hostelData = {
-            name: "Vishweshwaraiya Hostel",
+            name: " Boys Hostel",
             type: "Boys Hostel",
             totalRooms: 10,
             createdAt: new Date(),
