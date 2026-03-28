@@ -22,7 +22,9 @@ export default function RootLayout({
 
   // Hide header/footer on dashboard
   const hideLayout =
-    pathname.startsWith("/student/dashboard");
+    pathname.startsWith("/student/dashboard",
+    ) || pathname.startsWith("/hostel-incharge/dashboard") || pathname.startsWith("/academics/dashboard")|| pathname.startsWith("/faculty/dashboard")
+    ;
 
   return (
     <html lang="en" suppressHydrationWarning>
